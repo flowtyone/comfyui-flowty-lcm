@@ -1,22 +1,26 @@
 import sys
-import pkg_resources
 import subprocess
+import importlib
 
-def is_module_installed(module_name):
-    installed_packages = [d.key for d in pkg_resources.working_set]
-    return module_name in installed_packages
+def ensure_package(package, install_package_name=None):
+    # Try to import the package
+    try:
+        importlib.import_module(package)
+    except ImportError:
+        print(f"Package {package} is not installed. Installing now...")
 
-def install_module(module_name):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", module_name])
+        if "python_embeded" in sys.executable or "python_embedded" in sys.executable:
+            pip_install = [sys.executable, "-s", "-m", "pip", "install"]
+        else:
+            pip_install = [sys.executable, "-m", "pip", "install"]
 
-module_name = "diffusers"  
-if not is_module_installed(module_name):
-    print(f"### ComfyUI-LCM: {module_name} is not installed. Installing now...")
-    install_module(module_name)
-    print(f"### ComfyUI-LCM: {module_name} has been installed.")
-else:
-    print(f"### ComfyUI-LCM: {module_name} is already installed.")
+        subprocess.check_call(pip_install + [install_package_name or package])
+    else:
+        print(f"Package {package} is already installed.")
 
+module_name = "diffusers"
+
+ensure_package(module_name)
 
 from .nodes import NODE_CLASS_MAPPINGS, NODE_DISPLAY_NAME_MAPPINGS
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]

@@ -1,6 +1,5 @@
 from .lcm.lcm_scheduler import LCMScheduler
 from .lcm.lcm_pipeline import LatentConsistencyModelPipeline
-import folder_paths
 from os import path
 import time
 import torch
