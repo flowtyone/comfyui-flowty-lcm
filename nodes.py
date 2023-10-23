@@ -42,8 +42,8 @@ class LCMSampler:
     def sample(self, ckpt_name, seed, steps, cfg, positive_prompt, size, num_images):
         if self.pipe is None:
             self.pipe = LatentConsistencyModelPipeline.from_pretrained(
-                pretrained_model_name_or_path=folder_paths.get_annotated_filepath(ckpt_name, "checkpoints"),
-                local_files_only=True,
+                "SimianLuo/LCM_Dreamshaper_v7",#folder_paths.get_annotated_filepath(ckpt_name, "checkpoints"),
+                #local_files_only=True,
                 scheduler=self.scheduler
             )
             self.pipe.to(get_torch_device())
@@ -64,7 +64,7 @@ class LCMSampler:
 
         print("LCM inference time: ", time.time() - start_time, "seconds")
 
-        return (result,)
+        return ({"samples":result},)
 
 NODE_CLASS_MAPPINGS = {
     "LCMSampler": LCMSampler
