@@ -39,9 +39,13 @@ class LCMSampler:
 
     CATEGORY = "sampling"
 
-    def sample(self, ckpt_path, seed, steps, cfg, positive_prompt, size, num_images):
+    def sample(self, ckpt_name, seed, steps, cfg, positive_prompt, size, num_images):
         if self.pipe is None:
-            self.pipe = LatentConsistencyModelPipeline.from_pretrained(ckpt_path, scheduler=self.scheduler)
+            self.pipe = LatentConsistencyModelPipeline.from_pretrained(
+                pretrained_model_name_or_path=folder_paths.get_annotated_filepath(ckpt_name, "checkpoints"),
+                local_files_only=True,
+                scheduler=self.scheduler
+            )
             self.pipe.to(get_torch_device())
 
         torch.manual_seed(seed)
