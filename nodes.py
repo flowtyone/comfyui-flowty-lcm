@@ -24,9 +24,9 @@ class LCMSampler:
     @classmethod
     def INPUT_TYPES(s):
         return {"required":
-                    {"ckpt_name": (folder_paths.get_filename_list("checkpoints"), ),
+                    {
                     "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
-                    "steps": ("INT", {"default": 20, "min": 1, "max": 10000}),
+                    "steps": ("INT", {"default": 4, "min": 1, "max": 10000}),
                     "cfg": ("FLOAT", {"default": 8.0, "min": 0.0, "max": 100.0, "step":0.5, "round": 0.01}),
                     "size": ("INT", {"default": 512, "min": 512, "max": 768}),
                     "num_images": ("INT", {"default": 1, "min": 1, "max": 64}),
@@ -34,16 +34,16 @@ class LCMSampler:
                     }
                 }
 
-    RETURN_TYPES = ("LATENT",)
+    RETURN_TYPES = ("IMAGE",)
     FUNCTION = "sample"
 
     CATEGORY = "sampling"
 
-    def sample(self, ckpt_name, seed, steps, cfg, positive_prompt, size, num_images):
+    def sample(self, seed, steps, cfg, positive_prompt, size, num_images):
         if self.pipe is None:
             self.pipe = LatentConsistencyModelPipeline.from_pretrained(
-                "SimianLuo/LCM_Dreamshaper_v7",#folder_paths.get_annotated_filepath(ckpt_name, "checkpoints"),
-                #local_files_only=True,
+                pretrained_model_name_or_path="SimianLuo/LCM_Dreamshaper_v7",
+                local_files_only=True,
                 scheduler=self.scheduler
             )
             self.pipe.to(get_torch_device())
@@ -58,13 +58,14 @@ class LCMSampler:
             guidance_scale=cfg,
             num_inference_steps=steps,
             num_images_per_prompt=num_images,
-            lcm_origin_steps=50,
-            output_type="latent",
+            lcm_origin_steps=4,
+            output_type="np",
         ).images
 
         print("LCM inference time: ", time.time() - start_time, "seconds")
+        images_tensor = torch.from_numpy(result)
 
-        return ({"samples":result},)
+        return (images_tensor,)
 
 NODE_CLASS_MAPPINGS = {
     "LCMSampler": LCMSampler
